@@ -4,7 +4,6 @@ let index = -1;
 let volume = GetProfileSetting(306) / 10;
 let previousVolume = volume;
 let broadcastTime = 0;
-let tickID = 0;
 
 for (let i = 0, length = GetNumResourceMetadata("radio", "supersede_radio"); i < length; i++) {
     const radio = GetResourceMetadata("radio", "supersede_radio", i);
@@ -76,7 +75,6 @@ setInterval(function(){
 }, 1000);
 
 setTick(() => {
-	tickID += 1;
     if (IsPlayerVehicleRadioEnabled()) {
         let playerRadioStationName = GetPlayerRadioStationName();
 
@@ -100,11 +98,7 @@ setTick(() => {
     } else if (isPlaying) {
         StopCustomRadios();
     }
-	if(tickID == 60 ){
-		//broadcastTime += 1;
-		//console.log("Broadcast time: "+broadcastTime);
-		tickID = 0;
-	}
+
 
     volume = GetProfileSetting(306) / 10;
     if (previousVolume !== volume) {
