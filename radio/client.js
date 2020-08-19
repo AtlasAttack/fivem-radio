@@ -3,6 +3,8 @@ let isPlaying = false;
 let index = -1;
 let volume = GetProfileSetting(306) / 10;
 let previousVolume = volume;
+let broadcastTime = 0;
+let tickID = 0;
 
 for (let i = 0, length = GetNumResourceMetadata("radio", "supersede_radio"); i < length; i++) {
     const radio = GetResourceMetadata("radio", "supersede_radio", i);
@@ -18,6 +20,7 @@ for (let i = 0, length = GetNumResourceMetadata("radio", "supersede_radio"); i <
             customRadios.push({
                 "isPlaying": false,
                 "name": radio,
+				"duration": data.duration,
                 "data": data
             });
             if (data.name) {
@@ -43,6 +46,7 @@ const PlayCustomRadio = (radio) => {
     index = customRadios.indexOf(radio);
     ToggleCustomRadioBehavior();
     SendNuiMessage(JSON.stringify({ "type": "play", "radio": radio.name }));
+	SendNuiMessage(JSON.stringify({ "type": "seek", "time": broadcastTime }));
 };
 
 const StopCustomRadios = () => {
@@ -61,14 +65,30 @@ const ToggleCustomRadioBehavior = () => {
     }
 };
 
+onNet("radio:setBroadcastTime", (timeValue) => {
+	broadcastTime = timeValue;
+    
+});
+
+setInterval(function(){ 
+       broadcastTime += 1;
+	   //console.log("Broadcast time: "+broadcastTime);
+}, 1000);
+
 setTick(() => {
+	tickID += 1;
     if (IsPlayerVehicleRadioEnabled()) {
         let playerRadioStationName = GetPlayerRadioStationName();
 
         let customRadio = customRadios.find((radio) => {
             return radio.name === playerRadioStationName;
         });
-
+		if(customRadio && broadcastTime >= customRadio.duration){
+			//console.log("Resetting local broadcast time!")
+			//broadcastTime = 0;
+		}else{
+			//console.log("Broadcast time: "+broadcastTime);
+		}
         if (!isPlaying && customRadio) {
             PlayCustomRadio(customRadio);
         } else if (isPlaying && customRadio && customRadios.indexOf(customRadio) !== index) {
@@ -80,6 +100,11 @@ setTick(() => {
     } else if (isPlaying) {
         StopCustomRadios();
     }
+	if(tickID == 60 ){
+		//broadcastTime += 1;
+		//console.log("Broadcast time: "+broadcastTime);
+		tickID = 0;
+	}
 
     volume = GetProfileSetting(306) / 10;
     if (previousVolume !== volume) {
@@ -87,3 +112,4 @@ setTick(() => {
         previousVolume = volume;
     }
 });
+
