@@ -1,12 +1,12 @@
 const customRadios = [];
 let isPlaying = false;
 let index = -1;
-let volume = GetProfileSetting(306) / 10;
+let volume = GetProfileSetting(300) / 20;
 let previousVolume = volume;
 let broadcastTime = 0;
 
-for (let i = 0, length = GetNumResourceMetadata("radio", "supersede_radio"); i < length; i++) {
-    const radio = GetResourceMetadata("radio", "supersede_radio", i);
+for (let i = 0, length = GetNumResourceMetadata("lobb-radio", "supersede_radio"); i < length; i++) {
+    const radio = GetResourceMetadata("lobb-radio", "supersede_radio", i);
 
     if (!availableRadios.includes(radio)) {
         console.error(`radio: ${radio} is an invalid radio.`);
@@ -14,7 +14,7 @@ for (let i = 0, length = GetNumResourceMetadata("radio", "supersede_radio"); i <
     }
 
     try {
-        const data = JSON.parse(GetResourceMetadata("radio", "supersede_radio_extra", i));
+        const data = JSON.parse(GetResourceMetadata("lobb-radio", "supersede_radio_extra", i));
         if (data !== null) {
             customRadios.push({
                 "isPlaying": false,
@@ -35,6 +35,7 @@ for (let i = 0, length = GetNumResourceMetadata("radio", "supersede_radio"); i <
 
 RegisterNuiCallbackType("radio:ready");
 on("__cfx_nui:radio:ready", (data, cb) => {
+	console.log("Lobb Radio ready");
     SendNuiMessage(JSON.stringify({ "type": "create", "radios": customRadios, "volume": volume }));
     previousVolume = -1;
 });
@@ -100,7 +101,7 @@ setTick(() => {
     }
 
 
-    volume = GetProfileSetting(306) / 10;
+    volume = GetProfileSetting(300) / 20;
     if (previousVolume !== volume) {
         SendNuiMessage(JSON.stringify({ "type": "volume", "volume": volume }));
         previousVolume = volume;
